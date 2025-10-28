@@ -57,21 +57,23 @@ st.write("")
 # -----------------------------
 # Input Fields
 # -----------------------------
-col1, col2 = st.columns(2)
 inputs = {}
-    inputs['age'] = st.number_input("Age", min_value=0, max_value=120, value=45)
-    inputs['sex'] = st.selectbox("Sex", ["Male", "Female"])
-    inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
-    inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120)
-    inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=100, max_value=600, value=220)
-    inputs['fbs'] = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1])
-    inputs['restecg'] = st.selectbox("Resting ECG Results (0–2)", [0, 1, 2])
-    inputs['thalach'] = st.number_input("Maximum Heart Rate Achieved", min_value=60, max_value=220, value=150)
-    inputs['exang'] = st.selectbox("Exercise Induced Angina", [0, 1])
-    inputs['oldpeak'] = st.number_input("ST Depression (Oldpeak)", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
-    inputs['slope'] = st.selectbox("Slope of ST Segment (0–2)", [0, 1, 2])
-    inputs['ca'] = st.selectbox("Number of Major Vessels (0–3)", [0, 1, 2, 3])
-    inputs['thal'] = st.selectbox("Thalassemia (0=normal, 1=fixed, 2=reversible)", [0, 1, 2])
+
+st.subheader("🩺 Enter Patient Details")
+
+inputs['age'] = st.number_input("Age", min_value=0, max_value=120, value=45)
+inputs['sex'] = st.selectbox("Sex", ["Male", "Female"])
+inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
+inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120)
+inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=100, max_value=600, value=220)
+inputs['fbs'] = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1])
+inputs['restecg'] = st.selectbox("Resting ECG Results (0–2)", [0, 1, 2])
+inputs['thalach'] = st.number_input("Maximum Heart Rate Achieved", min_value=60, max_value=220, value=150)
+inputs['exang'] = st.selectbox("Exercise Induced Angina", [0, 1])
+inputs['oldpeak'] = st.number_input("ST Depression (Oldpeak)", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
+inputs['slope'] = st.selectbox("Slope of ST Segment (0–2)", [0, 1, 2])
+inputs['ca'] = st.selectbox("Number of Major Vessels (0–3)", [0, 1, 2, 3])
+inputs['thal'] = st.selectbox("Thalassemia (0=normal, 1=fixed, 2=reversible)", [0, 1, 2])
 
 # -----------------------------
 # Prediction Logic
@@ -111,4 +113,5 @@ st.markdown("""
 Developed by <b>Sanjana 💻</b> | Powered by <b>scikit-learn</b> & <b>Streamlit</b> 🧠 | ❤️ Machine Learning
 </div>
 """, unsafe_allow_html=True)
+
 
