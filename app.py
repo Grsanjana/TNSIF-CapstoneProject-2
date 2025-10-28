@@ -59,16 +59,12 @@ st.write("")
 # -----------------------------
 col1, col2 = st.columns(2)
 inputs = {}
-
-with col1:
     inputs['age'] = st.number_input("Age", min_value=0, max_value=120, value=45)
     inputs['sex'] = st.selectbox("Sex", ["Male", "Female"])
     inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
     inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120)
     inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=100, max_value=600, value=220)
     inputs['fbs'] = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1])
-
-with col2:
     inputs['restecg'] = st.selectbox("Resting ECG Results (0–2)", [0, 1, 2])
     inputs['thalach'] = st.number_input("Maximum Heart Rate Achieved", min_value=60, max_value=220, value=150)
     inputs['exang'] = st.selectbox("Exercise Induced Angina", [0, 1])
@@ -112,6 +108,7 @@ if st.button("🔍 Predict"):
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("""
 <div style='text-align:center;'>
-Developed by <b>Sanju 💻</b> | Powered by <b>scikit-learn</b> & <b>Streamlit</b> 🧠 | ❤️ Machine Learning
+Developed by <b>Sanjana 💻</b> | Powered by <b>scikit-learn</b> & <b>Streamlit</b> 🧠 | ❤️ Machine Learning
 </div>
 """, unsafe_allow_html=True)
+
