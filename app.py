@@ -62,7 +62,7 @@ inputs = {}
 st.subheader("🩺 Enter Patient Details")
 
 inputs['age'] = st.number_input("Age", min_value=0, max_value=120, value=45)
-inputs['sex'] = st.selectbox("Sex", ["Male", "Female"])
+inputs['sex'] = st.selectbox("Sex", [1,0])
 inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
 inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120)
 inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=100, max_value=600, value=220)
@@ -113,5 +113,6 @@ st.markdown("""
 Developed by <b>Sanjana 💻</b> | Powered by <b>scikit-learn</b> & <b>Streamlit</b> 🧠 | ❤️ Machine Learning
 </div>
 """, unsafe_allow_html=True)
+
 
 
