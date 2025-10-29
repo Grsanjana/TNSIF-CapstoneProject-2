@@ -62,7 +62,7 @@ inputs = {}
 st.subheader("🩺 Enter Patient Details")
 
 inputs['age'] = st.number_input("Age", min_value=0, max_value=120, value=45)
-inputs['sex'] = st.selectbox("Sex", [1,0])
+inputs['sex'] = st.selectbox("Sex (1 = Male, 0 = Female)", [1, 0])
 inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
 inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120)
 inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=100, max_value=600, value=220)
@@ -76,6 +76,12 @@ inputs['ca'] = st.selectbox("Number of Major Vessels (0–3)", [0, 1, 2, 3])
 inputs['thal'] = st.selectbox("Thalassemia (0=normal, 1=fixed, 2=reversible)", [0, 1, 2])
 
 # -----------------------------
+# Cholesterol Safety Warning
+# -----------------------------
+if inputs['chol'] < 120:
+    st.warning("⚠️ Cholesterol should not be less than 120 mg/dl for accurate prediction.")
+
+# -----------------------------
 # Prediction Logic
 # -----------------------------
 if st.button("🔍 Predict"):
@@ -84,9 +90,25 @@ if st.button("🔍 Predict"):
         input_order = feature_columns
         X = np.array([inputs[col] if col in inputs else 0 for col in input_order]).reshape(1, -1)
         X_scaled = scaler.transform(X)
-        prediction = model.predict(X_scaled)[0]
-        prob = model.predict_proba(X_scaled)[0][1] * 100
+        prob = model.predict_proba(X_scaled)[0][1]
 
+        # -----------------------------
+        # Custom Sensitivity Boost Logic
+        # -----------------------------
+        # If chest pain type or cholesterol are high, increase predicted probability slightly
+        if inputs['cp'] >= 2:
+            prob += 0.10  # more chest pain -> higher risk
+        if inputs['chol'] >= 240:
+            prob += 0.05  # high cholesterol -> higher risk
+        prob = min(prob, 1.0)  # cap at 1
+
+        # Custom threshold (lowered to detect disease early)
+        prediction = 1 if prob > 0.4 else 0
+        prob_percent = prob * 100
+
+        # -----------------------------
+        # Display Results
+        # -----------------------------
         st.markdown("<div class='result-box' style='background-color:#e3f2fd;'><b>Prediction Value:</b> {}</div>".format(prediction), unsafe_allow_html=True)
 
         if prediction == 1:
@@ -94,10 +116,10 @@ if st.button("🔍 Predict"):
         else:
             st.markdown("<div class='result-box' style='background-color:#e8f5e9; color:#2e7d32;'><b>✅ No Heart Disease Detected.</b></div>", unsafe_allow_html=True)
 
-        st.markdown(f"<div class='result-box' style='background-color:#f3e5f5;'><b>Probability:</b> {prob:.2f}%</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='result-box' style='background-color:#f3e5f5;'><b>Probability:</b> {prob_percent:.2f}%</div>", unsafe_allow_html=True)
 
-        risk_msg = "🟢 **Low Risk** – Continue healthy habits." if prob < 40 else \
-                   "🟡 **Moderate Risk** – Consider lifestyle changes." if prob < 70 else \
+        risk_msg = "🟢 **Low Risk** – Continue healthy habits." if prob_percent < 40 else \
+                   "🟡 **Moderate Risk** – Consider lifestyle changes." if prob_percent < 70 else \
                    "🔴 **High Risk** – Please consult a cardiologist."
         st.markdown(f"<div class='result-box' style='background-color:#e3f2fd;'>{risk_msg}</div>", unsafe_allow_html=True)
 
@@ -113,6 +135,3 @@ st.markdown("""
 Developed by <b>Sanjana 💻</b> | Powered by <b>scikit-learn</b> & <b>Streamlit</b> 🧠 | ❤️ Machine Learning
 </div>
 """, unsafe_allow_html=True)
-
-
-
