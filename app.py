@@ -1,73 +1,99 @@
 import streamlit as st
 import pickle
+import json
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 
 # -----------------------------
-# Load Trained Model
+# Load Model and Artifacts
 # -----------------------------
-model = pickle.load(open('model.pkl', 'rb'))
+with open("best_model.pkl", "rb") as f:  # ✅ Corrected filename
+    model = pickle.load(f)
+
+with open("scaler.pkl", "rb") as f:
+    scaler = pickle.load(f)
+
+with open("feature_columns.json", "r") as f:
+    feature_columns = json.load(f)
 
 # -----------------------------
-# Streamlit Page Config
+# Streamlit UI Setup
 # -----------------------------
 st.set_page_config(page_title="Heart Disease Prediction", page_icon="❤️", layout="centered")
 
+st.markdown("""
+    <style>
+    .main { background-color: #ffffff; padding: 2rem; }
+    .stButton button {
+        background-color: #e91e63; color: white; font-weight: bold;
+        border-radius: 8px; padding: 0.6rem 1.2rem;
+    }
+    .stButton button:hover { background-color: #ad1457; color: white; }
+    .result-box {
+        border-radius: 10px; padding: 15px; margin-top: 15px; text-align: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.markdown("<h1 style='text-align:center;'>❤️ Heart Disease Prediction App</h1>", unsafe_allow_html=True)
-st.write("### Enter details to check the risk of heart disease")
+st.markdown("<p style='text-align:center;'>Enter details to predict the risk of heart disease.</p>", unsafe_allow_html=True)
 
 # -----------------------------
-# Input Fields with Range Limits
+# Important Features
 # -----------------------------
-age = st.number_input('Age', min_value=1, max_value=120, value=40)
-cp = st.selectbox('Chest Pain Type (0–3)', [0,1,2,3])
-trestbps = st.number_input('Resting Blood Pressure (mm Hg)', min_value=80, max_value=200, value=120)
-chol = st.number_input('Serum Cholesterol (mg/dl)', min_value=100, max_value=600, value=200)
-thalach = st.number_input('Maximum Heart Rate Achieved', min_value=60, max_value=220, value=150)
-exang = st.selectbox('Exercise Induced Angina (1 = Yes, 0 = No)', [0,1])
-oldpeak = st.number_input('ST Depression (Oldpeak)', min_value=0.0, max_value=6.0, value=1.0, step=0.1)
-slope = st.selectbox('Slope of ST Segment (0–2)', [0,1,2])
-ca = st.selectbox('Number of Major Vessels (0–3)', [0,1,2,3])
-thal = st.selectbox('Thalassemia (1: Normal, 2: Fixed, 3: Reversible)', [1,2,3])
+st.subheader("🩺 Enter Patient Details")
+
+inputs = {}
+inputs['age'] = st.number_input("Age", min_value=20, max_value=100, value=45)
+inputs['sex'] = st.selectbox("Sex (1=Male, 0=Female)", [1, 0])
+inputs['cp'] = st.selectbox("Chest Pain Type (0–3)", [0, 1, 2, 3])
+inputs['trestbps'] = st.number_input("Resting Blood Pressure (mm Hg)", min_value=90, max_value=200, value=120)
+inputs['chol'] = st.number_input("Cholesterol (mg/dl)", min_value=120, max_value=600, value=200)
+inputs['thalach'] = st.number_input("Max Heart Rate Achieved", min_value=60, max_value=220, value=150)
+inputs['exang'] = st.selectbox("Exercise Induced Angina (1=Yes, 0=No)", [0, 1])
+inputs['oldpeak'] = st.number_input("ST Depression (Oldpeak)", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
+inputs['slope'] = st.selectbox("Slope of ST Segment (0–2)", [0, 1, 2])
+inputs['ca'] = st.selectbox("Number of Major Vessels (0–3)", [0, 1, 2, 3])
+inputs['thal'] = st.selectbox("Thalassemia (0=Normal, 1=Fixed, 2=Reversible)", [0, 1, 2])
 
 # -----------------------------
-# Input Validation
+# Validation Check
 # -----------------------------
-warning_flag = False
-if chol < 120:
-    st.warning("⚠️ Cholesterol value is below normal range (should be ≥ 120 mg/dl).")
-    warning_flag = True
-if trestbps < 90:
-    st.warning("⚠️ Resting Blood Pressure is too low (should be ≥ 90 mm Hg).")
-    warning_flag = True
-if thalach < 80:
-    st.warning("⚠️ Maximum Heart Rate is unusually low (should be ≥ 80 bpm).")
-    warning_flag = True
-if oldpeak < 0:
-    st.warning("⚠️ ST Depression cannot be negative.")
-    warning_flag = True
+if inputs['chol'] < 120:
+    st.warning("⚠️ Cholesterol value is too low! Please enter at least 120 mg/dl.")
+elif inputs['trestbps'] < 90:
+    st.warning("⚠️ Resting Blood Pressure is too low! Enter a value above 90 mm Hg.")
 
 # -----------------------------
 # Prediction Logic
 # -----------------------------
-features = np.array([[age, cp, trestbps, chol, thalach, exang, oldpeak, slope, ca, thal]])
+if st.button("🔍 Predict"):
+    try:
+        X = np.array([inputs[col] if col in inputs else 0 for col in feature_columns]).reshape(1, -1)
+        X_scaled = scaler.transform(X)
+        prediction = model.predict(X_scaled)[0]
+        prob = model.predict_proba(X_scaled)[0][1] * 100
 
-# Scale features
-scaler = StandardScaler()
-features_scaled = scaler.fit_transform(features)
+        st.markdown(f"<div class='result-box' style='background-color:#e3f2fd;'><b>Prediction Value:</b> {prediction}</div>", unsafe_allow_html=True)
 
-if st.button('🔍 Predict Heart Disease'):
-    if warning_flag:
-        st.error("⚠️ Please correct the highlighted input values before prediction.")
-    else:
-        prediction = model.predict(features_scaled)
-        if prediction[0] == 1:
-            st.error("🚨 The person is likely to have **Heart Disease.**")
+        if prediction == 1:
+            st.markdown("<div class='result-box' style='background-color:#ffebee; color:#d32f2f;'><b>⚠️ Heart Disease Detected!</b></div>", unsafe_allow_html=True)
         else:
-            st.success("✅ The person is **Healthy** — no sign of heart disease.")
+            st.markdown("<div class='result-box' style='background-color:#e8f5e9; color:#2e7d32;'><b>✅ No Heart Disease Detected.</b></div>", unsafe_allow_html=True)
+
+        st.markdown(f"<div class='result-box' style='background-color:#ede7f6;'><b>Probability:</b> {prob:.2f}%</div>", unsafe_allow_html=True)
+
+        if prob < 40:
+            st.info("🟢 **Low Risk** – Keep up the healthy lifestyle.")
+        elif prob < 70:
+            st.warning("🟡 **Moderate Risk** – Consider lifestyle improvements.")
+        else:
+            st.error("🔴 **High Risk** – Please consult a cardiologist soon.")
+
+    except Exception as e:
+        st.error(f"Error occurred: {e}")
 
 # -----------------------------
 # Footer
 # -----------------------------
 st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("<div style='text-align:center;'>Developed by <b>Sanjana 💻</b> | Powered by scikit-learn & Streamlit 🧠</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center;'>Developed by <b>Sanjana 💻</b> | Powered by <b>Streamlit</b> & <b>scikit-learn</b> 🧠</div>", unsafe_allow_html=True)
